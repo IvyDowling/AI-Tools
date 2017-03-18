@@ -11,19 +11,21 @@ def make_ngram(input_list, n):
     gram = list(zip(*[input_list[i:] for i in range(n)]))
     # add on a base frequency,on the list
     # start at 0 because we'll match ourselves in this alg
-    gram = [[i, 0] for i in gram]
-    for g1 in gram:
-        for g2 in gram:
-            if(g1[0] == g2[0]):
-                gram[gram.index(g1)][1] = gram[gram.index(g1)][1] + 1
-
+    gram = [list(i) for i in gram]
     input_dict = {}
     for g in gram:
-        input_dict = merge_dicts(input_dict, list_to_dict(g[0],g[1]))
+        # does this value exist in our dict
+        leaf_val = find_dict_leaf(input_dict, g)
+        #print(leaf_val)
+        if  leaf_val != None:
+            # this gram has been seen before
+            input_dict = merge_dicts(input_dict, list_to_dict(g, leaf_val + 1))
+        else:
+            # new gram
+            input_dict = merge_dicts(input_dict, list_to_dict(g, 1))
 
     #print(gram)
-    print(json.dumps(input_dict, indent=4))
-    print("Created ngram")
+    print(json.dumps(input_dict, indent=3))
     return input_dict
 
 
@@ -34,26 +36,24 @@ def list_to_dict(gram_list, v):
         return {gram_list[0] : list_to_dict(gram_list[1:], v)}
 
 
-def increment_dict_leaf(d):
-    # all of our leaves are digits
-    for k, v in d.items():
-        print(k)
-        if isinstance(v, dict):
-            increment_dict_leaf(v)
+def find_dict_leaf(d, key_list):
+    if d == None:
+        return None
+    if len(key_list) == 1:
+        if d.get(key_list[0]) is None:
+            return None
         else:
-            d[k] = v + 1
+            return d.get(key_list[0])
+    else:
+        return find_dict_leaf(d.get(key_list[0]), key_list[1:])
 
-    return d
 
+def merge_dicts(orig_dict, add_dict):
+    out = orig_dict.copy()
+    for k, v in add_dict.items():
+        out.update({k:v})
 
-def merge_dicts(*dict_args):
-    # here we need to increment the value at
-    # the leaf if we want to do proper Probabilities
-    result = {}
-    for dictionary in dict_args:
-        result.update(dictionary)
-
-    return result
+    return out
 
 
 def run(n, m, *argv):
@@ -87,19 +87,8 @@ def markov(tokens, n):
     phrase = []
     # starting point is a word that followed a '.','?','!'
     punct = rand.randint(0,3);
-    token_keys = ""
-    start = ""
-    if punct == 0:
-        token_keys = list(tokens["."].keys())
-        start = tokens["."][token_keys[rand.randint(0, len(token_keys))]]
-    elif punct == 1:
-        token_keys = list(tokens["?"].keys())
-        start = tokens["?"][token_keys[rand.randint(0, len(token_keys))]]
-    elif punct == 2:
-        token_keys = list(tokens["!"].keys())
-        start = tokens["!"][token_keys[rand.randint(0, len(token_keys))]]
-
-
+    token_keys = list(tokens["."].keys())
+    start = "."
     print(start)
     while True:
         if re.match('\W+', str(start)):
