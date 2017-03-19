@@ -83,27 +83,35 @@ def run(n, m, *argv):
 
 
 def markov(tokens, n):
-    print("Starting Markov")
+    # Start generating
+    # tokens is an n-deep dict
     phrase = []
     # starting point is a word that followed a '.','?','!'
+    """
     punct = rand.randint(0,3);
-    token_keys = list(tokens["."].keys())
     start = "."
-    print(start)
-    while True:
-        if re.match('\W+', str(start)):
-            phrase.append(start)
-            break
-        else:
-            start = tokens[rand.randint(0, len(tokens))]
+    if punct == 1:
+        start = "?"
+    if punct == 2:
+        start = "!"
+    """
+    start = list(tokens.keys())[rand.randint(0, len(tokens.keys()))]
+    # get first n-length phrase to start
+    c = rand.randint(0, leaf(tokens[start]))
+    # this algorithm walks through the tree
+    # and returns the path that's sum fits in the rand
+    print(json.dumps(tokens[start],indent=4))
+    phrase = walk_tree(tokens[start], c, [])
+    # phrase is not an n-1 length list of gram-ed strings
     while True:
         # take the last n-1 words in the
         # phrase and match them to another
         window = phrase[-(n - 1):]
-        swap = window
+        print(window)
+        swap = window.copy()
         # this match limits the list to grams that
         # have the same first word that as our window
-        for match in [gram for gram in tokens if gram[0] == window[0]]:
+        for match in [gram for gram in tokens.keys() if gram[0] == window[0]]:
             m = list(match)
             if m[:-1] == window:
                 phrase.append(m[n - 1])
@@ -114,6 +122,29 @@ def markov(tokens, n):
             # we're stuck
             phrase.append(".")
             return list(phrase)
+
+
+def walk_tree(t, i, path):
+    if isinstance(t, int):
+        return
+    for k in t:
+        swp = i
+        i -= leaf(t[k])
+        if i <= 0:
+            # we've picked a sub tree
+            path.append(k)
+            walk_tree(t[k],i, path)
+            return path
+
+
+def leaf(t):
+    if isinstance(t, dict):
+        val_tot = 0
+        for k in t.keys():
+            val_tot += leaf(t[k])
+        return val_tot
+    else:
+        return t
 
 
 if __name__ == "__main__":
