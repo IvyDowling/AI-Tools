@@ -84,8 +84,20 @@ def markov(tokens, n):
                 return list(phrase)
         if swap == window:
             # we're stuck
-            print("STUCK")
-            phrase.append(".")
+            # best course of action here is to redo
+            phrase = []
+            punct = rand.randint(0, 3);
+            start = "."
+            if punct == 1:
+                start = "?"
+            if punct == 2:
+                start = "!"
+            for gram in tokens:
+                if gram[0] == start:
+                    phrase = list(gram)[1:]
+                    if "." in phrase or "?" in phrase or "!" in phrase:
+                        return list(phrase)
+                    break
             return list(phrase)
 
 
