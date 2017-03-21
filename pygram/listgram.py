@@ -4,19 +4,6 @@ import json
 import random as rand
 
 
-def make_ngram(input_list, n):
-    # amazing line, found, online > list(zip(*[input_list[i:] for i in range(n)]))
-    # http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/
-    gram = list(zip(*[input_list[i:] for i in range(n)]))
-    # add on a base frequency,on the list
-    # start at 0 because we'll match ourselves in this alg
-    gram = [list(i) for i in gram]
-
-    # print(gram)
-    # print(json.dumps(input_dict, indent=3))
-    return gram
-
-
 def run(n, m, *argv):
     huge_list = []
     for f in argv:
@@ -41,6 +28,19 @@ def run(n, m, *argv):
         for w in markov(tokens, n):
             out += str(w) + " "
         print(out)
+
+
+def make_ngram(input_list, n):
+    # amazing line, found, online > list(zip(*[input_list[i:] for i in range(n)]))
+    # http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/
+    gram = list(zip(*[input_list[i:] for i in range(n)]))
+    # add on a base frequency,on the list
+    # start at 0 because we'll match ourselves in this alg
+    gram = [list(i) for i in gram]
+
+    # print(gram)
+    # print(json.dumps(input_dict, indent=3))
+    return gram
 
 
 def markov(tokens, n):
@@ -98,7 +98,6 @@ def markov(tokens, n):
                     if "." in phrase or "?" in phrase or "!" in phrase:
                         return list(phrase)
                     break
-            return list(phrase)
 
 
 if __name__ == "__main__":
